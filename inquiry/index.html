@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inquiry — Economics, Markets and Research</title>
+<meta name="description" content="Research projects on Indian markets: a momentum and mean-reversion backtest, a probability model of questioning, a market dashboard, inflation and the middle class, UPI and behaviour, and a weekly market journal.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="inquiry" data-page="inquiry">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="index.html">Inquiry</a> · <a href="../expression/index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="label label--blue">Inquiry</p>
+      <h1>Economics, markets and the questions underneath them</h1>
+      <p class="lede">Questions about Indian markets, prices and money, each checked against data or evidence: whether a simple trading rule beats the index, what inflation does to a household budget, how UPI changes spending. Where the answer was “no”, the page says so.</p>
+    </header>
+
+    <section class="section" aria-labelledby="h-projects">
+      <h2 id="h-projects" class="visually-hidden">Projects</h2>
+      <ol class="index" id="inq-index"></ol>
+    </section>
+
+    <section class="section" aria-labelledby="h-papers">
+      <div class="split">
+        <div><p class="label">Other papers</p><h2 id="h-papers" class="visually-hidden">Other papers</h2></div>
+        <div>
+          <ul class="index" id="inq-notes" style="counter-reset:none"></ul>
+          <p class="caption">Both are also listed with the market journal.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  var S = window.SITE, esc = window.Site.esc, url = window.Site.url;
+  document.getElementById("inq-index").innerHTML = S.projects.map(function (p) {
+    return '<li><a class="index__row" href="' + url(p.href) + '"><span class="index__title">' + esc(p.title) + '</span><span class="index__meta"><span class="status status--' + p.status + '">' + esc(p.statusText) + '</span></span><span class="index__desc">' + esc(p.summary) + "</span></a></li>";
+  }).join("");
+  document.getElementById("inq-notes").innerHTML = S.notes.map(function (n) {
+    return '<li><a class="index__row" href="' + window.Site.doc(n.doc) + '"><span class="index__title">' + esc(n.title) + '</span><span class="index__meta">' + esc(n.subject) + ' · PDF</span><span class="index__desc">' + esc(n.summary) + "</span></a></li>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantitative Investing Experiments — Momentum vs Mean Reversion</title>
+<meta name="description" content="A historical backtest of monthly momentum and mean-reversion rules on five Indian large caps against the Nifty 50 Price Index, August 2023 – June 2026. Neither strategy beat the benchmark.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="inquiry" data-page="quant">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="index.html">Inquiry</a> · <a href="../expression/index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Inquiry</a><span aria-hidden="true">/</span>Quantitative Investing</p>
+      <p class="label label--blue">Project 01 · Historical backtest</p>
+      <h1>Can a simple rule beat buying the index?</h1>
+      <p class="lede">Two monthly trading rules, momentum and mean reversion, tested on five Indian large-cap stocks against the Nifty 50 Price Index. Over this sample, neither beat the index.</p>
+      <dl class="facts">
+        <div><dt>Universe</dt><dd>RELIANCE, TCS, HDFCBANK, INFY, ICICIBANK (NSE)</dd></div>
+        <div><dt>Period</dt><dd>Aug 2023 – Jun 2026, monthly</dd></div>
+        <div><dt>Starting capital</dt><dd>₹100,000 per portfolio</dd></div>
+        <div><dt>Benchmark</dt><dd>Nifty 50 Price Index (^NSEI), buy and hold</dd></div>
+        <div><dt>Status</dt><dd><span class="status status--done">Completed</span></dd></div>
+      </dl>
+      <div class="actions">
+        <a class="btn btn--solid" href="../read.html#quantitative-investing">Read the paper (23 pages)</a>
+        <a class="btn" href="https://github.com/Abhi1258-arch/Indian-Market-Observatory" rel="noopener">Code and data on GitHub</a>
+        <a class="btn" href="https://abhi1258-arch.github.io/Indian-Market-Observatory/" rel="noopener">Results dashboard</a>
+      </div>
+    </header>
+
+    <div class="split section">
+      <nav class="toc" aria-label="On this page">
+        <ol>
+          <li><a href="#question">The question</a></li>
+          <li><a href="#method">Method</a></li>
+          <li><a href="#results">Results</a></li>
+          <li><a href="#robustness">Robustness</a></li>
+          <li><a href="#live">After the study</a></li>
+          <li><a href="#meaning">What it can and can’t show</a></li>
+          <li><a href="#limits">Limitations</a></li>
+          <li><a href="#next">Next</a></li>
+        </ol>
+      </nav>
+
+      <div class="prose" style="max-width:46rem">
+        <section id="question">
+          <h2 style="margin-top:0">The question</h2>
+          <p>Can simple systematic strategies based on momentum and mean reversion outperform passive investing in Indian large-cap equities?</p>
+          <p>Momentum is the idea that recent winners keep winning for a while; mean reversion is the idea that recent losers bounce back. Both have a long history in finance research, mostly on US data over long periods. This project applies the plainest possible version of each to a small, current Indian sample, and reports what happened.</p>
+          <p>The hypotheses were set before looking at results, and none of them assumed the strategies would win: each strategy would produce a <em>different</em> cumulative return from the index (H1, H2), and might show different risk (H3).</p>
+        </section>
+
+        <section id="method">
+          <h2>Method</h2>
+          <ul>
+            <li><strong>Signal.</strong> Each stock’s return in the previous month.</li>
+            <li><strong>Momentum.</strong> Buy the two stocks with the highest signal.</li>
+            <li><strong>Mean reversion.</strong> Buy the two stocks with the lowest signal: “buy whatever did worst last month”. Not a z-score or moving-average model.</li>
+            <li><strong>Weights.</strong> 50/50 between the two stocks, rebalanced monthly.</li>
+            <li><strong>No look-ahead.</strong> Month <i>t</i>’s selection uses only month <i>t−1</i>’s return. Checked for every stock and month: zero mismatches. August and September 2023 have no valid signal, so trading starts in October 2023.</li>
+            <li><strong>Costs.</strong> The baseline assumes zero costs and slippage; costs are tested separately below.</li>
+            <li><strong>Data.</strong> Monthly adjusted closes from Yahoo Finance via <code>yfinance</code>.</li>
+          </ul>
+        </section>
+
+        <section id="results">
+          <h2>Results</h2>
+          <p>Value of ₹100,000 in each portfolio, month by month. Hover or tap the chart for values.</p>
+          <ul class="legend" id="legend-value"></ul>
+          <div class="chart" id="chart-value"></div>
+          <p class="caption">Source: the project’s <code>momentum_backtest.csv</code>, <code>mean_reversion_backtest.csv</code> and <code>nifty50_benchmark.csv</code>. Zero transaction costs.</p>
+
+          <div class="table-wrap">
+            <table id="metrics">
+              <caption>Baseline performance, August 2023 – June 2026, zero transaction costs</caption>
+            </table>
+          </div>
+
+          <p>The index grew to about ₹124,000. Momentum reached about ₹105,300 while taking on the most volatility and the deepest drawdown; mean reversion ended almost exactly where it started. Both strategies changed their pair of stocks almost every month (momentum in 28 of 33 active months, mean reversion in 27).</p>
+
+          <h3>Drawdown from previous peak</h3>
+          <ul class="legend" id="legend-dd"></ul>
+          <div class="chart" id="chart-dd"></div>
+          <p class="caption">Source: the project’s <code>drawdown_*.csv</code> files.</p>
+        </section>
+
+        <section id="robustness">
+          <h2>Robustness</h2>
+          <h3>Starting everyone at the same moment</h3>
+          <p>Because the strategies sit flat for their first two months while the index is already moving, all three were rebased to ₹100,000 at October 2023. The order does not change: Nifty ₹125,085.17, momentum ₹109,547.54, mean reversion ₹102,805.15.</p>
+          <h3>Transaction costs</h3>
+          <p>A round-trip cost was charged whenever a strategy switched stocks, at four illustrative levels. These are stress points, not a claim about real brokerage costs. The line marks the ₹100,000 starting capital.</p>
+          <ul class="legend" id="legend-cost"></ul>
+          <div class="chart" id="chart-cost"></div>
+          <p class="caption">Source: the project’s <code>transaction_cost_sensitivity.csv</code>. Final value after the full sample.</p>
+          <p>At 25 basis points momentum’s gain is almost gone; at 50, both strategies lose money. The baseline result is close enough to break-even that realistic costs could erase it.</p>
+        </section>
+
+        <section id="live">
+          <h2>After the study: tracking the rules forward</h2>
+          <p>The paper’s results stop at June 2026 and do not change. Since then the same rules keep running on new prices, the same five stocks, the same two-stock picks, zero costs, so each new month is a test on data the rules have never seen.</p>
+          <p class="live-status" id="live-status" role="status"></p>
+          <div id="live-body" hidden>
+            <dl class="facts" id="live-facts"></dl>
+            <ul class="legend" id="legend-live"></ul>
+            <div class="chart" id="chart-live"></div>
+            <div class="table-wrap"><table id="live-table"></table></div>
+            <p class="caption">Prices: Yahoo Finance (adjusted month-end closes; the latest month uses the latest price). Before extending, the page re-runs the rules over the study period and checks that they reproduce the paper’s numbers.</p>
+          </div>
+        </section>
+
+        <section id="meaning">
+          <h2>What it can and can’t show</h2>
+          <p>Within this five-stock universe and this period, the Nifty 50 Price Index accumulated more value than either rule. That is the finding, and it is worth stating plainly rather than explaining away.</p>
+          <p>It does not show that momentum or mean reversion never work, or that active investing is pointless. It describes one small test, with one set of rules, over about three years.</p>
+          <p>The paper connects momentum to possible investor underreaction and mean reversion to possible overreaction. Those are ideas from the wider literature offered as context. This backtest measures prices, not psychology, so it cannot say that either behaviour caused these returns.</p>
+        </section>
+
+        <section id="limits">
+          <h2>Limitations</h2>
+          <ul>
+            <li>Five stocks, a tiny slice of the market, held two at a time.</li>
+            <li>About three years of data, one historical window, no out-of-sample test.</li>
+            <li>Zero baseline costs and slippage.</li>
+            <li>The benchmark is a price index and excludes dividends, so it probably understates what passive investing returned.</li>
+            <li>Only a one-month signal was tried.</li>
+          </ul>
+        </section>
+
+        <section id="next">
+          <h2>Next</h2>
+          <p>Ideas from the paper, none of them tested yet: a wider universe (Nifty 100 or 500), longer lookbacks, a total-return benchmark, realistic cost data, and walk-forward testing on a period the rules have never seen.</p>
+          <div class="note"><strong>Historical backtest, not advice.</strong> These are results from past data under specific assumptions. They are not predictions or investment advice. Figures in the study sections are read directly from the project’s results files; only the live-tracking section is calculated in the browser.</div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/backtest-data.js"></script>
+<script src="../assets/js/charts.js"></script>
+<script src="../assets/js/observatory-data.js"></script>
+<script src="../assets/js/live.js"></script>
+<script src="../assets/js/live-backtest.js"></script>
+<script>
+(function () {
+  var B = window.BACKTEST;
+  var COLORS = { momentum: "#5F5679", meanReversion: "#B07A2E", nifty: "#252522" };
+  var SERIES = [
+    { key: "momentum", name: "Momentum", tiny: "Mom.", color: COLORS.momentum },
+    { key: "meanReversion", name: "Mean reversion", short: "Mean rev.", tiny: "Mean rev.", color: COLORS.meanReversion },
+    { key: "nifty", name: "Nifty 50 Price Index", short: "Nifty 50", color: COLORS.nifty, width: 2.5 }
+  ];
+  var rupee = function (v, d) { return "₹" + v.toLocaleString("en-US", { maximumFractionDigits: d || 0, minimumFractionDigits: d || 0 }); };
+  var pct = function (v, d) { return (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(d == null ? 2 : d) + "%"; };
+  var legend = function (id, list) {
+    document.getElementById(id).innerHTML = list.map(function (s) { return '<li><i style="background:' + s.color + '"></i>' + s.name + "</li>"; }).join("");
+  };
+
+  legend("legend-value", SERIES);
+  Charts.line(document.getElementById("chart-value"), {
+    labels: B.months, baseline: 100000,
+    series: SERIES.map(function (s) { return Object.assign({ values: B.value[s.key] }, s); }),
+    yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; },
+    tipFormat: function (v) { return rupee(v); },
+    ariaLabel: "Line chart of portfolio value from August 2023 to June 2026. Nifty 50 ends at ₹123,953, momentum at ₹105,319, mean reversion at ₹99,876. Full figures are in the table below."
+  });
+
+  legend("legend-dd", SERIES);
+  Charts.line(document.getElementById("chart-dd"), {
+    labels: B.months, baseline: 0, yMax: 0, height: 260,
+    series: SERIES.map(function (s) { return Object.assign({ values: B.drawdown[s.key] }, s); }),
+    yFormat: function (v) { return Math.round(v * 100) + "%"; },
+    tipFormat: function (v) { return pct(v, 1); },
+    ariaLabel: "Line chart of drawdown from previous peak. Deepest drawdowns: momentum −22.06%, mean reversion −19.78%, Nifty 50 −14.78%."
+  });
+
+  legend("legend-cost", SERIES.slice(0, 2));
+  Charts.bars(document.getElementById("chart-cost"), {
+    groups: B.costs.map(function (c) { return c.bps + " bps"; }), base: 100000,
+    series: SERIES.slice(0, 2).map(function (s) { return { name: s.name, color: s.color, values: B.costs.map(function (c) { return c[s.key]; }) }; }),
+    yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; },
+    labelFormat: function (v) { return "₹" + (v / 1000).toFixed(1) + "k"; },
+    tipFormat: function (v) { return rupee(v, 2); },
+    ariaLabel: "Bar chart of final value by round-trip cost. Momentum: 105,319 at 0 bps, 103,280 at 10, 100,292 at 25, 95,495 at 50. Mean reversion: 99,876, 97,980, 95,199, 90,733."
+  });
+
+  var rows = [
+    ["Final value", function (m) { return rupee(m.finalValue, 2); }],
+    ["Total return", function (m) { return pct(m.totalReturn); }],
+    ["CAGR", function (m) { return pct(m.cagr); }],
+    ["Annualised volatility", function (m) { return (m.vol * 100).toFixed(2) + "%"; }],
+    ["Sharpe ratio (rf = 0%)", function (m) { return m.sharpe.toFixed(3); }],
+    ["Maximum drawdown", function (m) { return pct(m.maxDD); }],
+    ["Best month", function (m) { return pct(m.best); }],
+    ["Worst month", function (m) { return pct(m.worst); }],
+    ["Positive / negative months", function (m) { return m.pos + " / " + m.neg; }]
+  ];
+  var M = B.metrics;
+  var t = document.getElementById("metrics");
+  t.insertAdjacentHTML("beforeend", "<thead><tr><th scope=\"col\">Metric</th>" + M.map(function (m) { return '<th scope="col" class="num">' + m.strategy.replace(" Price Index", "") + "</th>"; }).join("") + "</tr></thead><tbody>" +
+    rows.map(function (r) { return '<tr><th scope="row" style="font-weight:400">' + r[0] + "</th>" + M.map(function (m) { return '<td class="num">' + r[1](m) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody>");
+
+  /* ---- live tracking after the study (only when the local server's live API is available) */
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var mLabel = function (m) { return MONTHS[+m.slice(5) - 1] + " " + m.slice(0, 4); };
+  var status = document.getElementById("live-status");
+  var drawLive = function (o, live) {
+    if (!o.ok) { status.textContent = "Live prices did not reproduce the paper’s numbers, so no extension is shown."; return; }
+    document.getElementById("live-body").hidden = false;
+    var first = o.months.indexOf("2026-06"), last = o.months.length - 1;
+    var since = function (k) { return o.value[k][last] / o.value[k][first] - 1; };
+    var now = new Date();
+    var check = " Before any new month is added, the rules are re-run over the study period and reproduce the paper’s numbers (largest difference " + (o.maxDiff * 100).toFixed(3) + "%).";
+    status.innerHTML = live
+      ? '<span class="live-dot" aria-hidden="true"></span><strong>Live.</strong> Updated ' + now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) + " · refreshes every minute · prices may be delayed up to 15 minutes." + check
+      : "<strong>Prices as of " + Live.dateIST(Date.parse(o.asOf) / 1000) + ".</strong>" + check;
+    document.getElementById("live-facts").innerHTML = SERIES.map(function (s) {
+      return "<div><dt>" + s.name.replace(" Price Index", "") + "</dt><dd>" + rupee(o.value[s.key][last]) + '<br><span class="muted small">' + pct(since(s.key), 1) + " since June 2026</span></dd></div>";
+    }).join("");
+    var host = document.getElementById("chart-live"); host.innerHTML = "";
+    Charts.line(host, {
+      labels: o.months, baseline: 100000, marker: { at: "2026-06", text: "Study ends" },
+      series: SERIES.map(function (s) { return Object.assign({ values: o.value[s.key] }, s); }),
+      yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; },
+      tipFormat: function (v) { return rupee(v); },
+      xTip: function (m) { return mLabel(m) + (m === o.current ? " (to date)" : ""); },
+      ariaLabel: "Line chart continuing the backtest past June 2026 with live prices. Latest values: momentum " + rupee(o.value.momentum[last]) + ", mean reversion " + rupee(o.value.meanReversion[last]) + ", Nifty 50 " + rupee(o.value.nifty[last]) + "."
+    });
+    document.getElementById("live-table").innerHTML = "<caption>Each month since the study ended</caption>" +
+      '<thead><tr><th scope="col">Month</th><th scope="col">Momentum held</th><th scope="col" class="num">Return</th><th scope="col">Mean reversion held</th><th scope="col" class="num">Return</th><th scope="col" class="num">Nifty 50</th></tr></thead><tbody>' +
+      o.extension.slice().reverse().map(function (e) {
+        return "<tr><td>" + mLabel(e.month) + (e.partial ? ' <span class="muted small">to date</span>' : "") + "</td><td>" + e.momentumPicks.join(", ") + '</td><td class="num">' + pct(e.ret.momentum, 1) +
+          "</td><td>" + e.meanReversionPicks.join(", ") + '</td><td class="num">' + pct(e.ret.meanReversion, 1) + '</td><td class="num">' + pct(e.ret.nifty, 1) + "</td></tr>";
+      }).join("") + "</tbody>";
+  };
+  Live.available().then(function (yes) {
+    if (!yes) { var snap = LiveBacktest.fromSnapshot(B, window.OBSERVATORY); if (snap) drawLive(snap, false); return; }
+    var refresh = function () {
+      LiveBacktest.load(B).then(function (o) { drawLive(o, true); }, function () { status.textContent = "Could not reach the live price source just now; will try again in a minute."; });
+    };
+    status.textContent = "Loading live prices…";
+    refresh();
+    Live.every(60000, refresh);
+  });
+})();
+</script>
+</body>
+</html>

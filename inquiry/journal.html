@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Market Journal and Research Notes</title>
+<meta name="description" content="A weekly journal on global and Indian markets, March to September 2026, and longer research notes on monetary policy and investor psychology.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="inquiry" data-page="journal">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="index.html">Inquiry</a> · <a href="../expression/index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Inquiry</a><span aria-hidden="true">/</span>Market Journal</p>
+      <p class="label label--blue">Project 05 · Archive</p>
+      <h1>Market journal and research notes</h1>
+      <p class="lede">Every week from March to September 2026 I wrote down what happened in global and Indian markets and why it seemed to matter. Those entries are reproduced as written.</p>
+      <p class="live-status" id="j-status" role="status"></p>
+    </header>
+
+    <section class="section" aria-labelledby="h-notes">
+      <div class="split">
+        <div><p class="label">Research notes</p><h2 id="h-notes" class="visually-hidden">Research notes</h2></div>
+        <div><ul class="index" id="notes"></ul></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-journal">
+      <div class="split">
+        <div>
+          <p class="label">Weekly journal</p>
+          <h2 id="h-journal" style="font-size:1.6rem"><span id="j-count"></span> weeks</h2>
+          <p class="muted small">Newest first. Open an entry to read it.</p>
+          <p class="muted small" id="j-auto-note" hidden></p>
+        </div>
+        <div>
+          <div class="filters" role="group" aria-label="Filter entries by month" id="filters"></div>
+          <ol class="entries" id="entries"></ol>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/journal-data.js"></script>
+<script src="../assets/js/live.js"></script>
+<script src="../assets/js/journal.js"></script>
+<script>
+(function () {
+  var esc = window.Site.esc, url = window.Site.url;
+  document.getElementById("notes").innerHTML = window.SITE.notes.map(function (n) {
+    return '<li><a class="index__row" href="' + window.Site.doc(n.doc) + '"><span class="index__title">' + esc(n.title) + '</span><span class="index__meta">' + esc(n.subject) + " · PDF</span>" +
+      '<span class="index__desc">' + esc(n.summary) + (n.tags.length ? " · " + n.tags.map(esc).join(", ") : "") + "</span></a></li>";
+  }).join("");
+
+  // Entries: the live Word file when the local server is running, otherwise journal-data.js
+  // (the hand-written weeks only). Titles look like "March 2 – March 8, 2026".
+  var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  var filters = document.getElementById("filters"), list = document.getElementById("entries");
+  var current = "", shown = null, openTitles = {};
+
+  function render(raw) {
+    var entries = raw.map(function (e) {
+      var d = Journal.startDate(e.title) || "";
+      return { title: e.title, month: d ? MONTHS[+d.slice(5, 7) - 1] + " " + d.slice(0, 4) : "", auto: Journal.isAutomated(e.title), sections: e.sections || [] };
+    }).reverse();
+    var key = entries.map(function (e) { return e.title; }).join("|");
+    if (key === shown) return;   // nothing new
+    shown = key;
+    Array.prototype.forEach.call(list.querySelectorAll("details[open]"), function (d) { openTitles[d.getAttribute("data-t")] = true; });
+    document.getElementById("j-count").textContent = entries.length;
+    var anyAuto = entries.some(function (e) { return e.auto; }), note = document.getElementById("j-auto-note");
+    note.hidden = !anyAuto; note.textContent = (window.SITE.journal || {}).automatedNote || "";
+
+    var months = [];
+    entries.forEach(function (e) { if (months.indexOf(e.month) < 0) months.push(e.month); });
+    months.reverse();
+    if (current && months.indexOf(current) < 0) current = "";
+    filters.innerHTML = '<button class="chip" type="button" aria-pressed="' + !current + '" data-m="">All</button>' +
+      months.map(function (m) { return '<button class="chip" type="button" aria-pressed="' + (m === current) + '" data-m="' + m + '">' + m + "</button>"; }).join("");
+
+    list.innerHTML = entries.map(function (e) {
+      var subjects = e.sections.map(function (s) { return s.heading; }).filter(Boolean);
+      return '<li class="entry" data-m="' + e.month + '"' + (current && e.month !== current ? " hidden" : "") + '><details data-t="' + esc(e.title) + '"' + (openTitles[e.title] ? " open" : "") + ">" +
+        '<summary><span class="entry__date">Week of' + (e.auto ? '<span class="badge-auto">Automated</span>' : "") + '</span><span class="entry__title">' + esc(e.title) + '</span><span class="entry__subjects">' + esc(subjects.join(" · ")) + "</span></summary>" +
+        '<div class="entry__body">' + e.sections.map(function (s) {
+          return (s.heading ? "<h3>" + esc(s.heading) + "</h3>" : "") + s.paragraphs.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
+        }).join("") + "</div></details></li>";
+    }).join("");
+  }
+
+  filters.addEventListener("click", function (ev) {
+    var b = ev.target.closest(".chip"); if (!b) return;
+    Array.prototype.forEach.call(filters.children, function (c) { c.setAttribute("aria-pressed", String(c === b)); });
+    current = b.getAttribute("data-m");
+    Array.prototype.forEach.call(list.children, function (li) { li.hidden = !!current && li.getAttribute("data-m") !== current; });
+  });
+
+  render(window.JOURNAL || []);
+  var status = document.getElementById("j-status");
+  Live.available().then(function (yes) {
+    if (!yes) return;
+    var load = function () {
+      Live.get("/api/journal").then(function (j) {
+        render(j.entries);
+        var d = new Date(j.modified);
+        status.innerHTML = '<span class="live-dot" aria-hidden="true"></span>Reading the journal file directly; new weeks appear here automatically. File last changed ' +
+          d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) + ", " + d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) + ".";
+      }, function () { status.textContent = "Could not read the journal file just now."; });
+    };
+    load();
+    Live.every(300000, load);
+  });
+})();
+</script>
+</body>
+</html>

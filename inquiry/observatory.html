@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indian Market Observatory</title>
+<meta name="description" content="A small research dashboard for Indian markets: Nifty 50, sector performance, CPI inflation, the RBI repo rate, strategy backtests, a weekly journal and research notes.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="inquiry" data-page="observatory">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="index.html">Inquiry</a> · <a href="../expression/index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Inquiry</a><span aria-hidden="true">/</span>Indian Market Observatory</p>
+      <p class="label label--blue">Dashboard</p>
+      <h1>Indian Market Observatory</h1>
+      <p class="lede">One page for following Indian markets: the index, its sectors, inflation, the policy rate, my strategy tests and my notes.</p>
+      <p class="note" id="snapshot" style="margin-bottom:0"></p>
+    </header>
+
+    <div class="split section">
+      <nav class="toc" aria-label="Dashboard sections">
+        <ol>
+          <li><a href="#nifty">Nifty 50</a></li>
+          <li><a href="#sectors">Sectors</a></li>
+          <li><a href="#cpi">Inflation</a></li>
+          <li><a href="#repo">RBI repo rate</a></li>
+          <li><a href="#strategies">Strategy results</a></li>
+          <li><a href="#notes">Journal and notes</a></li>
+          <li><a href="#about-data">About the data</a></li>
+        </ol>
+      </nav>
+
+      <div style="min-width:0">
+        <section id="nifty" class="obs">
+          <p class="label">01 · Nifty 50 overview</p>
+          <h2>Nifty 50</h2>
+          <dl class="facts" id="nifty-facts"></dl>
+          <div class="filters" role="group" aria-label="Chart range" id="nifty-range"></div>
+          <div class="chart" id="chart-nifty"></div>
+          <p class="caption" id="nifty-caption"></p>
+        </section>
+
+        <section id="sectors" class="obs">
+          <p class="label">02 · Sector performance</p>
+          <h2>Sectors</h2>
+          <p class="muted">Price return of each NSE sector index over the chosen period, with the Nifty 50 for comparison.</p>
+          <div class="filters" role="group" aria-label="Return period" id="sector-period"></div>
+          <div class="table-wrap"><table class="sector-table" id="sector-table"></table></div>
+          <p class="caption">Source: Yahoo Finance (NSE sector indices). Returns compare the latest close with month-end closes.</p>
+        </section>
+
+        <section id="cpi" class="obs">
+          <p class="label">03 · CPI inflation tracker</p>
+          <h2>Inflation</h2>
+          <dl class="facts" id="cpi-facts"></dl>
+          <div class="chart" id="chart-cpi"></div>
+          <p class="caption">Source: World Bank, consumer price inflation (annual %), India. The shaded band is the RBI’s 2–6% tolerance range around its 4% target, in force since 2016.</p>
+        </section>
+
+        <section id="repo" class="obs">
+          <p class="label">04 · RBI repo-rate timeline</p>
+          <h2>RBI repo rate</h2>
+          <dl class="facts" id="repo-facts"></dl>
+          <div class="chart" id="chart-repo"></div>
+          <details class="obs-details">
+            <summary>Every change since 2015</summary>
+            <div class="table-wrap"><table id="repo-table"></table></div>
+          </details>
+          <p class="caption" id="repo-caption"></p>
+        </section>
+
+        <section id="strategies" class="obs">
+          <p class="label">05 · Strategy results</p>
+          <h2>Momentum vs mean reversion</h2>
+          <p class="muted" id="strat-note"></p>
+          <ul class="legend" id="legend-strat"></ul>
+          <div class="chart" id="chart-strat"></div>
+          <p><a class="arrow" href="quant.html">Full method and results </a> · <a href="https://abhi1258-arch.github.io/Indian-Market-Observatory/" rel="noopener">original backtest dashboard</a> · <a href="https://github.com/Abhi1258-arch/Indian-Market-Observatory" rel="noopener">code</a></p>
+        </section>
+
+        <section id="notes" class="obs">
+          <p class="label">06 · Weekly journal and research notes</p>
+          <h2>Journal and notes</h2>
+          <div class="grid-2">
+            <div><h3>Latest journal weeks</h3><ul class="obs-list" id="journal-latest"></ul><p><a class="arrow" href="journal.html"><span id="journal-count">All weeks</span> </a></p></div>
+            <div><h3>Research notes</h3><ul class="obs-list" id="notes-list"></ul></div>
+          </div>
+        </section>
+
+        <section id="about-data" class="obs">
+          <p class="label">About the data</p>
+          <h2>Sources and status</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Component</th><th scope="col">Status</th><th scope="col">Source</th><th scope="col">Updated</th></tr></thead>
+              <tbody>
+                <tr><th scope="row" style="font-weight:500">Nifty 50 overview</th><td><span class="status status--done">Built</span></td><td>Yahoo Finance (^NSEI)</td><td>With each data refresh</td></tr>
+                <tr><th scope="row" style="font-weight:500">Sector performance</th><td><span class="status status--done">Built</span></td><td>Yahoo Finance (NSE sector indices)</td><td>With each data refresh</td></tr>
+                <tr><th scope="row" style="font-weight:500">CPI inflation tracker</th><td><span class="status status--done">Built</span></td><td>World Bank API</td><td>Yearly, as the World Bank publishes</td></tr>
+                <tr><th scope="row" style="font-weight:500">RBI repo-rate timeline</th><td><span class="status status--done">Built</span></td><td>rbi.org.in (current rate), RBI policy statements (history)</td><td>Current rate with each refresh; history after each MPC decision</td></tr>
+                <tr><th scope="row" style="font-weight:500">Strategy results</th><td><span class="status status--done">Built</span></td><td>My backtest, continued with live prices</td><td>Study fixed to Jun 2026; later months added with each refresh</td></tr>
+                <tr><th scope="row" style="font-weight:500">Weekly journal, research notes</th><td><span class="status status--done">Built</span></td><td>The journal’s Word file</td><td>Weekly</td></tr>
+                <tr><th scope="row" style="font-weight:500">Interactive charts</th><td><span class="status status--done">Built</span></td><td>—</td><td>Hover or tap any chart for values</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="muted small">The date at the top of the page shows how current the figures are. Prices come from Yahoo Finance and may be delayed up to 15 minutes. Index levels are price indices (dividends excluded). This is a learning project, not investment advice.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/charts.js"></script>
+<script src="../assets/js/observatory-data.js"></script>
+<script src="../assets/js/observatory-rbi.js"></script>
+<script src="../assets/js/backtest-data.js"></script>
+<script src="../assets/js/journal-data.js"></script>
+<script src="../assets/js/live.js"></script>
+<script src="../assets/js/live-backtest.js"></script>
+<script src="../assets/js/journal.js"></script>
+<script src="../assets/js/observatory.js"></script>
+</body>
+</html>

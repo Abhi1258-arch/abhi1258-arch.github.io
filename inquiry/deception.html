@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mathematics of Deception — Bayes, Entropy and the Next Best Question</title>
+<meta name="description" content="Can Bayesian inference and information theory design the best sequence of questions for deciding whether a statement is a lie? A model, a simulation of 20,000 interrogations, and its limits.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="inquiry" data-page="deception">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="index.html">Inquiry</a> · <a href="../expression/index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Inquiry</a><span aria-hidden="true">/</span>The Mathematics of Deception</p>
+      <p class="label label--blue">Mathematics · probability and information theory</p>
+      <h1>Can mathematics choose the next best question?</h1>
+      <p class="lede">A painting disappears overnight. The watchman says he never left the east wing. Bayes’ theorem says how much each answer should change our belief; information theory says which question to ask next. This paper combines the two and tests them with a simulation.</p>
+      <dl class="facts">
+        <div><dt>Tools</dt><dd>Bayes’ theorem, entropy, expected information gain</dd></div>
+        <div><dt>Test</dt><dd>Simulation, 20,000 interrogations per condition, fixed seeds</dd></div>
+        <div><dt>Code</dt><dd>Python (NumPy), with a verification script</dd></div>
+        <div><dt>Status</dt><dd><span class="status status--done">Paper completed</span></dd></div>
+      </dl>
+      <div class="actions"><a class="btn btn--solid" href="../read.html#mathematics-of-deception">Read the paper (31 pages)</a></div>
+    </header>
+
+    <div class="split section">
+      <nav class="toc" aria-label="On this page">
+        <ol>
+          <li><a href="#question">The question</a></li>
+          <li><a href="#model">The model</a></li>
+          <li><a href="#idea">Three ideas</a></li>
+          <li><a href="#try">Try it</a></li>
+          <li><a href="#results">Results</a></li>
+          <li><a href="#limits">What it can’t do</a></li>
+        </ol>
+      </nav>
+      <div class="prose" style="max-width:46rem">
+        <section id="question">
+          <h2 style="margin-top:0">The question</h2>
+          <blockquote>Given uncertainty about whether a statement is truthful, can Bayesian inference and information theory be combined to design a sequence of questions that maximises the probability of identifying the truth with the fewest questions?</blockquote>
+          <p>It breaks into three parts: <strong>updating</strong> (how an answer should change the probability of a lie), <strong>measuring</strong> (how much uncertainty is left, and how much a question removes on average), and <strong>choosing</strong> (whether always asking the most informative question beats asking at random). Only the third makes a prediction that can be tested, and the paper tests it.</p>
+          <div class="note"><strong>Not a lie detector.</strong> The paper is explicit that it does not detect lies in real people. It builds a small invented world with written-down rules, where every conclusion can be proved, and keeps that separate from real human behaviour.</div>
+        </section>
+
+        <section id="model">
+          <h2>The model</h2>
+          <ul>
+            <li>A hidden variable: the statement is a lie or it is true. The starting belief is 50/50.</li>
+            <li>Each question produces an observable feature (a hesitation, a contradiction, an oddly precise time). Liars and truth-tellers produce it with different, known probabilities.</li>
+            <li>Answers are independent given the truth, the suspect doesn’t adapt, and only a limited number of yes/no questions can be asked.</li>
+          </ul>
+          <p>Every assumption is listed with the reason for it, and the later sections remove them one by one: different priors, wrong probabilities, correlated answers, a rehearsed liar, and a cost for each question.</p>
+        </section>
+
+        <section id="idea">
+          <h2>Three ideas</h2>
+          <h3>Bayes’ theorem</h3>
+          <p>Each answer multiplies the odds of a lie by its likelihood ratio, how much more often a liar gives that answer than a truth-teller.</p>
+          <h3>Entropy</h3>
+          <p>A measure of how uncertain we are: 1 bit at 50/50, zero at certainty.</p>
+          <h3>Expected information gain</h3>
+          <p>How much a question is expected to reduce entropy before we hear the answer. A question is only worth asking if liars and truth-tellers answer it differently. “Does he mention the weather?” (50% either way) is worth exactly nothing.</p>
+        </section>
+
+        <section id="try">
+          <h2>Try it: question the watchman</h2>
+          <p>The computer has secretly decided whether the watchman is lying, like a coin toss. Your job is to find out with as few questions as you can.</p>
+          <ol class="lab-how">
+            <li><strong>Ask a question.</strong> He answers the way the paper’s model says a liar or an honest person would, and neither is perfectly predictable.</li>
+            <li><strong>Watch the meter.</strong> It shows how likely a lie is, given every answer so far (Bayes’ theorem). Some questions move it a lot, some barely at all.</li>
+            <li><strong>Make your call</strong> when you’re confident, and see if you were right. The ★ marks the question the paper’s algorithm would ask next.</li>
+          </ol>
+          <div id="lab" class="lab"></div>
+          <p class="caption">The ten questions, and how often liars and honest people give each answer, are the paper’s own question bank: modelling choices, not measurements of real people. The updates use the paper’s formulas.</p>
+        </section>
+
+        <section id="results">
+          <h2>Results</h2>
+          <p>20,000 simulated interrogations per strategy, starting at 50/50, stopping at 90% confidence either way or after all ten questions.</p>
+          <div class="table-wrap">
+            <table>
+              <caption>Baseline simulation results</caption>
+              <thead><tr><th scope="col"></th><th scope="col" class="num">Max EIG</th><th scope="col" class="num">Random</th></tr></thead>
+              <tbody>
+                <tr><th scope="row" style="font-weight:400">Accuracy</th><td class="num">88.4%</td><td class="num">88.1%</td></tr>
+                <tr><th scope="row" style="font-weight:400">Mean questions asked</th><td class="num">4.69</td><td class="num">6.68</td></tr>
+                <tr class="is-bench"><th scope="row">Median questions asked</th><td class="num">3</td><td class="num">7</td></tr>
+                <tr><th scope="row" style="font-weight:400">Finished within 3 questions</th><td class="num">65.2%</td><td class="num">14.8%</td></tr>
+                <tr><th scope="row" style="font-weight:400">Accuracy with only 3 questions allowed</th><td class="num">83.7%</td><td class="num">74.5%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>So the strategy doesn’t find the truth more often than asking everything; about 88% is close to the limit of what the question bank contains. It finds it with far fewer questions, and when questions are scarce, it finds it more often.</p>
+          <p>The extensions show where this breaks. When the probabilities are wrong, when answers are correlated, or when the liar rehearses, the mathematics still runs but its confidence stops being trustworthy.</p>
+        </section>
+
+        <section id="limits">
+          <h2>What it can’t do</h2>
+          <ul>
+            <li>Every probability in the question bank was invented. Measuring real ones would need careful experiments, and they would vary from person to person.</li>
+            <li>Real statements can be partly true, mistaken or misremembered. Nervousness is not deception.</li>
+            <li>The strategy is greedy: it picks one question at a time instead of planning the whole sequence.</li>
+            <li>The simulation tests the method against a world that follows the model’s rules exactly, not against reality.</li>
+          </ul>
+          <p>The paper’s own summary: the mathematics does not detect lies. It detects uncertainty and reduces it.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script src="../assets/js/deception-game.js"></script>
+</body>
+</html>
