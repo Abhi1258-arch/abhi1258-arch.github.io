@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inquiry and Expression</title>
+<meta name="description" content="A personal archive: backtests and research on Indian markets, poems, guitar riffs, and an original feature screenplay.">
+<meta property="og:title" content="abhiram — Inquiry and Expression">
+<meta property="og:description" content="Some things I try to understand. Some things I try to make.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-root="" data-page="home">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="index.html">Home</a> <a href="inquiry/index.html">Inquiry</a> · <a href="expression/index.html">Expression</a> · <a href="projects.html">Projects</a> · <a href="about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <section class="hero lightbox-stage" aria-labelledby="intro">
+    <span class="light" aria-hidden="true"></span>
+    <div class="wrap">
+      <p class="label">A personal archive</p>
+      <h1 id="intro">Some things I try to understand. Some things I try to make.</h1>
+      <p class="lede">Backtests and papers on Indian markets, inflation and money. Two poems, three guitar riffs and a feature screenplay. Kept in one place, because they started from the same habit of asking why.</p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="divide">
+      <section class="divide__half" aria-labelledby="h-inq">
+        <p class="label label--blue">Inquiry</p>
+        <h2 id="h-inq">Numbers, tested</h2>
+        <p>Economics and markets, worked through with data. A momentum backtest that lost to the index, a probability model of how to ask questions, a market dashboard, and papers on inflation and digital payments.</p>
+        <p><a class="arrow" href="inquiry/index.html">Go to Inquiry </a></p>
+      </section>
+      <section class="divide__half" aria-labelledby="h-exp">
+        <p class="label label--violet">Expression</p>
+        <h2 id="h-exp">Things, made</h2>
+        <p>Poems, original guitar riffs, a notebook for unfinished sounds, and a screenplay about a young man who films other people's lives.</p>
+        <p><a class="arrow" href="expression/index.html">Go to Expression </a></p>
+      </section>
+    </div>
+  </div>
+
+  <section class="section" aria-labelledby="h-research">
+    <div class="wrap split">
+      <div>
+        <p class="label label--blue">Selected research</p>
+        <h2 id="h-research" class="visually-hidden">Selected research</h2>
+      </div>
+      <div>
+        <ol class="index" id="home-research"></ol>
+        <p style="margin-top:1.5rem"><a class="arrow" href="inquiry/index.html">All research </a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="feature--dark" aria-labelledby="h-film">
+    <div class="wrap section">
+      <div class="feature">
+        <div>
+          <p class="label">Featured · original feature screenplay</p>
+          <h2 id="h-film" style="font-size:clamp(2rem,4.5vw,3.2rem)">Everything Was Already Alive</h2>
+          <p class="muted">Philosophical drama · Poetic realism · Slow cinema</p>
+        </div>
+        <div>
+          <p class="lede">A young man who feels disconnected from his own life starts filming people devoted to ordinary things, hoping to learn what keeps them going, and runs into the difference between watching life and taking part in it.</p>
+          <div class="actions">
+            <a class="btn" href="expression/screenplay.html">Read the screenplay</a>
+            <a class="btn" href="expression/film.html">About the film</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-music">
+    <div class="wrap split">
+      <div>
+        <p class="label label--violet">Music</p>
+        <h2 id="h-music" style="font-size:1.6rem">Three riffs</h2>
+        <p class="muted small">Three different original riffs, not three takes of one.</p>
+      </div>
+      <div>
+        <ul class="riffs" id="home-riffs"></ul>
+        <p style="margin-top:1.5rem"><a class="arrow" href="expression/music.html">Music and guitar </a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-poems">
+    <div class="wrap split">
+      <div>
+        <p class="label label--violet">Poetry</p>
+        <h2 id="h-poems" class="visually-hidden">Poems</h2>
+      </div>
+      <div>
+        <ul class="poem-list" id="home-poems"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/content.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var S = window.SITE, esc = window.Site.esc;
+  document.getElementById("home-research").innerHTML = S.projects.filter(function (p) { return ["quant", "deception", "observatory", "inflation"].indexOf(p.id) > -1; }).map(function (p) {
+    return '<li><a class="index__row" href="' + p.href + '"><span class="index__title">' + esc(p.title) + '</span><span class="index__meta">' + esc(p.kicker) + '</span><span class="index__desc">' + esc(p.summary) + "</span></a></li>";
+  }).join("");
+  document.getElementById("home-riffs").innerHTML = S.riffs.map(function (r) {
+    return '<li><h3 style="font-size:1.15rem"><a href="expression/riff.html?id=' + r.id + '">' + esc(r.title) + '</a></h3><div class="player player--small" data-src="' + r.audio + '" data-title="' + esc(r.title) + '" data-duration="' + r.duration + '"></div></li>';
+  }).join("");
+  document.getElementById("home-poems").innerHTML = S.poems.map(function (p) {
+    return '<li><a href="expression/poem.html?id=' + p.id + '"><span class="t">' + esc(p.title) + '</span><span class="first">' + esc(p.text.split("\n")[0]) + "</span></a></li>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

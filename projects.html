@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects — Index of Work</title>
+<meta name="description" content="An index of every project on the site: research, poems, recordings and the screenplay.">
+<link rel="icon" href="assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-root="" data-page="projects">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="index.html">Home</a> <a href="inquiry/index.html">Inquiry</a> · <a href="expression/index.html">Expression</a> · <a href="about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="label">Index</p>
+      <h1>Everything, in one list</h1>
+    </header>
+    <section class="section" aria-labelledby="h-i">
+      <div class="split">
+        <div><p class="label label--blue">Inquiry</p><h2 id="h-i" class="visually-hidden">Inquiry</h2></div>
+        <ol class="index" id="list-inquiry"></ol>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="h-e">
+      <div class="split">
+        <div><p class="label label--violet">Expression</p><h2 id="h-e" class="visually-hidden">Expression</h2></div>
+        <ol class="index" id="list-expression"></ol>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="assets/js/content.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+(function () {
+  var S = window.SITE, esc = window.Site.esc;
+  var row = function (href, title, meta, desc) {
+    return '<li><a class="index__row" href="' + href + '"><span class="index__title">' + esc(title) + '</span><span class="index__meta">' + meta + '</span><span class="index__desc">' + esc(desc) + "</span></a></li>";
+  };
+  document.getElementById("list-inquiry").innerHTML =
+    S.projects.map(function (p) { return row(p.href, p.title, '<span class="status status--' + p.status + '">' + esc(p.statusText) + "</span>", p.summary); }).join("") +
+    S.notes.map(function (n) { return row(window.Site.doc(n.doc), n.title, esc(n.subject) + " · PDF", n.summary); }).join("");
+  document.getElementById("list-expression").innerHTML =
+    row("expression/film.html", "Everything Was Already Alive", "Feature screenplay", "Philosophical drama · Poetic realism · Slow cinema. 60 pages, 95 scenes.") +
+    S.poems.map(function (p) { return row("expression/poem.html?id=" + p.id, p.title, "Poem", p.text.split("\n")[0]); }).join("") +
+    S.riffs.map(function (r) { return row("expression/riff.html?id=" + r.id, r.title, "Riff · " + esc(r.duration), r.description); }).join("") +
+    row("expression/anatomy.html", "The Anatomy of a Sound", "Listening studies", "One study in progress: guitar phrasing in Pearl Jam’s “Black”.");
+})();
+</script>
+</body>
+</html>
