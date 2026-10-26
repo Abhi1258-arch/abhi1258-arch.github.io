@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poem</title>
+<meta name="description" content="An original poem.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="poetry">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="poetry.html">Poetry</a></div></noscript></header>
+
+<main id="main" class="poem-page">
+  <div class="wrap">
+    <article class="poem" id="poem" aria-live="polite">
+      <noscript><p>This poem needs JavaScript to display. <a href="poetry.html">Back to poetry</a>.</p></noscript>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  var esc = window.Site.esc, poems = window.SITE.poems;
+  var id = new URLSearchParams(location.search).get("id");
+  var i = -1;
+  poems.forEach(function (p, k) { if (p.id === id) i = k; });
+  var el = document.getElementById("poem");
+  if (i < 0) {
+    el.innerHTML = '<h1>Not found</h1><p>There is no poem here. <a href="poetry.html">Back to poetry</a>.</p>';
+    return;
+  }
+  var p = poems[i];
+  document.title = p.title + " — a poem";
+  var stanzas = p.text.split(/\n\s*\n/).map(function (st) {
+    return '<p class="poem__stanza">' + st.split("\n").map(function (l) { return '<span class="poem__line">' + esc(l) + "</span>"; }).join("") + "</p>";
+  }).join("");
+  var other = poems[(i + 1) % poems.length];
+  el.innerHTML =
+    '<p class="label label--violet">Poem</p><h1>' + esc(p.title) + "</h1>" +
+    '<div class="poem__body">' + stanzas + "</div>" +
+    (p.note ? '<p class="caption">' + esc(p.note) + "</p>" : "") +
+    '<nav class="poem__end" aria-label="Poems"><a href="poetry.html">← All poems</a>' +
+    (other !== p ? '<a href="poem.html?id=' + other.id + '">' + esc(other.title) + " →</a>" : "") + "</nav>";
+})();
+</script>
+</body>
+</html>

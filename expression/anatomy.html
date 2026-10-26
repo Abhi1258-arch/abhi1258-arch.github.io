@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Anatomy of a Sound</title>
+<meta name="description" content="Investigations into why a musical moment works: tension, voicing, phrasing, sustain and repetition, with listening notes kept apart from my own experiments.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="anatomy">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="music.html">Music</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Expression</a><span aria-hidden="true">/</span><a href="music.html">Music</a><span aria-hidden="true">/</span>The Anatomy of a Sound</p>
+      <p class="label label--violet">Listening studies</p>
+      <h1>The Anatomy of a Sound</h1>
+      <p class="lede">Not “I like this song”, but why a particular moment in it works: why a chord change feels unresolved, how a voicing changes the feeling of the same notes, what sustain, dynamics and phrasing do to a guitar line.</p>
+      <div class="axis" aria-hidden="true" style="margin-top:2.5rem"></div>
+    </header>
+
+    <div id="studies"></div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  var esc = window.Site.esc;
+  var LABELS = { planned: ["planned", "Planned"], "in-progress": ["progress", "In progress"], completed: ["done", "Completed"] };
+  // each study reads as one numbered sequence; the experiment steps say "Planned" until recordings exist
+  var STEPS = [
+    ["question", "The question", "Listening"], ["noticed", "What I noticed", "Listening"], ["detail", "The detail behind it", "Listening"],
+    ["tried", "What I’ll try myself", "Experiment", true], ["changed", "What to listen for", "Experiment", true],
+    ["learned", "What I think so far", ""], ["media", "Audio", "", true]
+  ];
+  document.getElementById("studies").innerHTML = window.SITE.anatomy.map(function (a) {
+    var st = LABELS[a.status] || LABELS.planned, done = a.status === "completed";
+    var val = function (k) { return k === "question" ? a.question : a.steps[k]; };
+    return '<section class="section study" aria-labelledby="study-' + a.id + '"><div class="split">' +
+      '<div><p class="label label--violet">Study 01</p><p><span class="status status--' + st[0] + '">' + st[1] + "</span></p></div>" +
+      "<div>" +
+        '<h2 id="study-' + a.id + '" style="font-size:clamp(1.8rem,3.4vw,2.4rem)">' + esc(a.title) + "</h2>" +
+        '<p class="muted">' + esc(a.kind) + "</p>" +
+        '<ol class="steps">' + STEPS.filter(function (s) { return val(s[0]); }).map(function (s) {
+          var tag = s[2] ? s[2] + (s[3] && !done ? " · planned" : "") : (s[3] && !done ? "Planned" : "");
+          return "<li><div><h3>" + s[1] + (tag ? ' <span class="step-tag">' + tag + "</span>" : "") + "</h3><p>" + esc(val(s[0])) + "</p></div></li>";
+        }).join("") + "</ol>" +
+      "</div></div></section>";
+  }).join("");
+})();
+</script>
+</body>
+</html>

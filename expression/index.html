@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expression — Poetry, Music and Film</title>
+<meta name="description" content="A creative archive: two poems, three original guitar riffs, listening studies, and the feature screenplay Everything Was Already Alive.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="expression">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="../inquiry/index.html">Inquiry</a> · <a href="index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head lightbox-stage">
+      <span class="light" aria-hidden="true"></span>
+      <p class="label label--violet">Expression</p>
+      <h1>A creative archive</h1>
+      <p class="lede">Poems, sounds and a screenplay. Some finished, some not. Each is shown as it is.</p>
+    </header>
+
+    <section class="section" aria-labelledby="h-poetry">
+      <div class="split">
+        <div><p class="label label--violet">01 · Poetry</p><h2 id="h-poetry" style="font-size:1.6rem"><a href="poetry.html" style="color:inherit;text-decoration:none">Poetry</a></h2></div>
+        <div><ul class="poem-list" id="poems"></ul></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-music">
+      <div class="split">
+        <div><p class="label label--violet">02 · Music and guitar</p><h2 id="h-music" style="font-size:1.6rem"><a href="music.html" style="color:inherit;text-decoration:none">Music</a></h2></div>
+        <div>
+          <ol class="index">
+            <li><a class="index__row" href="music.html"><span class="index__title">Riffs</span><span class="index__meta">3 recordings</span><span class="index__desc">Three different original guitar riffs, each with its own page.</span></a></li>
+            <li><a class="index__row" href="anatomy.html"><span class="index__title">The Anatomy of a Sound</span><span class="index__meta">Listening studies</span><span class="index__desc">Trying to work out why a musical moment works, rather than just saying I like it.</span></a></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-film">
+      <div class="split">
+        <div><p class="label label--violet">03 · Film and screenwriting</p><h2 id="h-film" style="font-size:1.6rem"><a href="film.html" style="color:inherit;text-decoration:none">Film</a></h2></div>
+        <div>
+          <ol class="index">
+            <li><a class="index__row" href="film.html"><span class="index__title">Everything Was Already Alive</span><span class="index__meta">Feature screenplay · 60 pages</span><span class="index__desc">Philosophical drama · Poetic realism · Slow cinema. A young man starts filming people devoted to ordinary things.</span></a></li>
+          </ol>
+          <div class="actions"><a class="btn" href="screenplay.html">Read the screenplay</a></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+document.getElementById("poems").innerHTML = window.SITE.poems.map(function (p) {
+  return '<li><a href="poem.html?id=' + p.id + '"><span class="t">' + window.Site.esc(p.title) + '</span><span class="first">' + window.Site.esc(p.text.split("\n")[0]) + "</span></a></li>";
+}).join("");
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poetry</title>
+<meta name="description" content="Two original poems: Salt and Her Voice.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="poetry">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="../inquiry/index.html">Inquiry</a> · <a href="index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Expression</a><span aria-hidden="true">/</span>Poetry</p>
+      <p class="label label--violet">Poetry</p>
+      <h1>Poems</h1>
+    </header>
+    <section class="section" aria-label="Poems">
+      <div class="split">
+        <div></div>
+        <ul class="poem-list" id="poems"><noscript><li>The poems need JavaScript to display.</li></noscript></ul>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+document.getElementById("poems").innerHTML = window.SITE.poems.map(function (p) {
+  return '<li><a href="poem.html?id=' + p.id + '"><span class="t">' + window.Site.esc(p.title) + '</span><span class="first">' + window.Site.esc(p.text.split("\n")[0]) + "</span></a></li>";
+}).join("");
+</script>
+</body>
+</html>

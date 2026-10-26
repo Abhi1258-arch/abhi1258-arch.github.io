@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music and Guitar</title>
+<meta name="description" content="Three original guitar riffs and a listening study.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="music">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="../inquiry/index.html">Inquiry</a> · <a href="index.html">Expression</a> · <a href="../about.html">About</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <header class="page-head">
+      <p class="crumbs"><a href="index.html">Expression</a><span aria-hidden="true">/</span>Music</p>
+      <p class="label label--violet">Music and guitar</p>
+      <h1>Riffs</h1>
+      <p class="lede">Three different original riffs, not three takes of one.</p>
+      <div class="staff" aria-hidden="true" style="margin-top:2.5rem"></div>
+    </header>
+
+    <section class="section" aria-label="Riffs">
+      <div class="split">
+        <div><p class="label">Recordings</p></div>
+        <ul class="riffs" id="riffs"></ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-more">
+      <div class="split">
+        <div><p class="label">Also</p><h2 id="h-more" class="visually-hidden">More</h2></div>
+        <ol class="index">
+          <li><a class="index__row" href="anatomy.html"><span class="index__title">The Anatomy of a Sound</span><span class="index__meta">Listening studies</span><span class="index__desc">Why a musical moment works: questions, listening notes and experiments.</span></a></li>
+        </ol>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+document.getElementById("riffs").innerHTML = window.SITE.riffs.map(function (r) {
+  var esc = window.Site.esc;
+  return '<li><h3><a href="riff.html?id=' + r.id + '">' + esc(r.title) + "</a></h3>" +
+    '<p class="muted small">' + (r.titleIsTemporary ? "Temporary label · " : "") + "Dated " + esc(r.dated) + " · " + esc(r.duration) + "</p>" +
+    '<div class="player" data-src="../' + r.audio + '" data-title="' + esc(r.title) + '" data-duration="' + r.duration + '"></div></li>';
+}).join("");
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riff</title>
+<meta name="description" content="An original guitar riff recording.">
+<link rel="icon" href="../assets/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-root="../" data-section="expression" data-page="music">
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header" id="site-header"><noscript><div class="wrap"><a class="wordmark" href="../index.html">Home</a> <a href="music.html">Music</a></div></noscript></header>
+
+<main id="main">
+  <div class="wrap">
+    <div id="riff"><noscript><p class="section">The player needs JavaScript. <a href="music.html">Back to music</a>.</p></noscript></div>
+  </div>
+</main>
+
+<footer class="site-footer" id="site-footer"></footer>
+<script src="../assets/js/content.js"></script>
+<script src="../assets/js/site.js"></script>
+<script>
+(function () {
+  var esc = window.Site.esc, riffs = window.SITE.riffs;
+  var id = new URLSearchParams(location.search).get("id");
+  var r = riffs.filter(function (x) { return x.id === id; })[0];
+  var el = document.getElementById("riff");
+  if (!r) { el.innerHTML = '<div class="page-head"><h1>Not found</h1><p>No recording here. <a href="music.html">Back to music</a>.</p></div>'; return; }
+  document.title = r.title + " — original guitar riff";
+  var i = riffs.indexOf(r), prev = riffs[i - 1], next = riffs[i + 1];
+  el.innerHTML =
+    '<header class="page-head">' +
+      '<p class="crumbs"><a href="index.html">Expression</a><span aria-hidden="true">/</span><a href="music.html">Music</a><span aria-hidden="true">/</span>' + esc(r.title) + "</p>" +
+      '<p class="label label--violet">Original riff' + (r.titleIsTemporary ? " · temporary title" : "") + "</p>" +
+      "<h1>" + esc(r.title) + "</h1>" +
+      '<p class="lede">' + esc(r.description) + "</p>" +
+      '<dl class="facts"><div><dt>Dated</dt><dd>' + esc(r.dated) + '</dd></div><div><dt>Length</dt><dd>' + esc(r.duration) + '</dd></div><div><dt>Instrument</dt><dd>Guitar</dd></div></dl>' +
+    "</header>" +
+    '<section class="section"><div class="split"><div><p class="label">Listen</p></div><div>' +
+      '<div class="player" data-src="../' + r.audio + '" data-title="' + esc(r.title) + '" data-duration="' + r.duration + '"></div>' +
+      (r.takes.length ? '<h2 style="font-size:1.2rem;margin-top:2rem">Other takes</h2>' + r.takes.map(function (t) { return '<p class="small muted" style="margin:1rem 0 0">' + esc(t.label) + '</p><div class="player player--small" data-src="../' + t.audio + '" data-title="' + esc(r.title + " — " + t.label) + '"></div>'; }).join("") : "") +
+    "</div></div></section>" +
+    '<nav class="poem__end" aria-label="Other riffs" style="margin-bottom:2rem">' +
+      (prev ? '<a href="riff.html?id=' + prev.id + '">← ' + esc(prev.title) + "</a>" : '<a href="music.html">← All riffs</a>') +
+      (next ? '<a href="riff.html?id=' + next.id + '">' + esc(next.title) + " →</a>" : '<a href="music.html">All riffs →</a>') +
+    "</nav>";
+})();
+</script>
+</body>
+</html>
