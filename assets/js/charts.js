@@ -28,14 +28,18 @@
   /* opts: { labels: ["2023-08", …], series: [{ name, color, values, width, dash, step }], yFormat, tipFormat, yMin, yMax, baseline, height, ariaLabel,
              band: { from, to, label }, xTick(label, i, n, W) -> text|null, xTip(label) -> text } */
   function line(host, opts) {
-    var W = width(host), H = opts.height || (W < 500 ? 280 : 340), m = { t: 16, r: W < 500 ? 78 : 118, b: 30, l: W < 500 ? 46 : 62 };
+    var W = width(host), H = opts.height || (W < 500 ? 280 : 340), m = { t: opts.marker ? 30 : 16, r: W < 500 ? 78 : 118, b: 30, l: W < 500 ? 46 : 62 };
     var n = opts.labels.length;
     var all = [];
     opts.series.forEach(function (s) { all = all.concat(s.values); });
-    var yMin = opts.yMin != null ? opts.yMin : Math.min.apply(null, all);
-    var yMax = opts.yMax != null ? opts.yMax : Math.max.apply(null, all);
-    var ticks = niceTicks(yMin, yMax, 5);
-    yMin = Math.min(yMin, ticks[0]); yMax = Math.max(yMax, ticks[ticks.length - 1]);
+    var dMin = Math.min.apply(null, all), dMax = Math.max.apply(null, all);
+    var yMin = opts.yMin != null ? Math.min(opts.yMin, dMin) : dMin;
+    var yMax = opts.yMax != null ? Math.max(opts.yMax, dMax) : dMax;
+    // gridlines always enclose the data: extend one step past either end if needed
+    var ticks = niceTicks(yMin, yMax, 5), step = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
+    while (ticks[ticks.length - 1] < yMax - 1e-9) ticks.push(+(ticks[ticks.length - 1] + step).toFixed(10));
+    while (ticks[0] > yMin + 1e-9) ticks.unshift(+(ticks[0] - step).toFixed(10));
+    yMin = ticks[0]; yMax = ticks[ticks.length - 1];
     var x = function (i) { return m.l + (i / (n - 1)) * (W - m.l - m.r); };
     var y = function (v) { return m.t + (1 - (v - yMin) / (yMax - yMin)) * (H - m.t - m.b); };
 
@@ -49,29 +53,38 @@
     // optional shaded band, e.g. a target range: { from, to, label }
     if (opts.band) {
       el("rect", { x: m.l, y: y(opts.band.to), width: W - m.l - m.r, height: y(opts.band.from) - y(opts.band.to), fill: "var(--blue)", opacity: .16 }, svg);
-      if (opts.band.label) el("text", { x: m.l + 6, y: y(opts.band.to) + 13, class: "tick" }, svg).textContent = opts.band.label;
+      var bandLabel = opts.band.label ? el("text", { x: W - m.r - 6, y: y(opts.band.from) - 6, "text-anchor": "end", class: "tick halo" }, svg) : null;
+      if (bandLabel) bandLabel.textContent = opts.band.label;
     }
     // optional vertical marker: { at: "2026-06", text: "Study ends" }
     if (opts.marker && opts.labels.indexOf(opts.marker.at) > -1) {
       var mx = x(opts.labels.indexOf(opts.marker.at));
-      el("line", { x1: mx, x2: mx, y1: m.t, y2: H - m.b, stroke: "var(--grey)", "stroke-dasharray": "3 3" }, svg);
-      el("text", { x: mx - 5, y: m.t + 10, "text-anchor": "end", class: "tick" }, svg).textContent = opts.marker.text;
+      el("line", { x1: mx, x2: mx, y1: m.t - 14, y2: H - m.b, stroke: "var(--grey)", "stroke-dasharray": "3 3" }, svg);
+      el("text", { x: mx, y: m.t - 18, "text-anchor": "middle", class: "tick" }, svg).textContent = opts.marker.text;   // above the plot, clear of the lines
     }
-    // x labels: custom (opts.xTick), quarterly for short spans, else each January
-    var short = n <= 16, skip = Math.ceil(n / (W < 500 ? 5 : 8));
+    // x labels: custom (opts.xTick), quarterly for short spans, half-yearly up to 4 years, else each January
+    var short = n <= 16, half = !short && n <= 48 && W >= 500, skip = Math.ceil(n / (W < 500 ? 5 : 8));
     opts.labels.forEach(function (lab, i) {
       var text;
       if (opts.xTick) text = opts.xTick(lab, i, n, W);
       else if (short) text = (n - 1 - i) % 3 === 0 ? monthLabel(lab).replace(/ 20(\d\d)$/, " ’$1") : null;
+      else if (half && lab.slice(5) === "07") text = "Jul";
       else if (lab.slice(5) === "01" && (n < 72 || +lab.slice(0, 4) % Math.ceil(skip / 12) === 0)) text = lab.slice(0, 4);
       else if (i === 0 && W >= 500 && !opts.labels.slice(1, Math.ceil(n / 6)).some(function (l) { return l.slice(5) === "01"; })) text = monthLabel(lab);   // skip if a January label sits too close
       if (!text) return;
       el("text", { x: x(i), y: H - 8, "text-anchor": i === 0 ? "start" : i === n - 1 ? "end" : "middle", class: "tick" }, svg).textContent = text;
       el("line", { x1: x(i), x2: x(i), y1: H - m.b, y2: H - m.b + 5, stroke: "var(--grey-light)" }, svg);
     });
-    // end labels, nudged apart so they never overlap
+    // end labels (name, and the latest value when opts.endFormat is given), nudged apart so they never overlap
+    var endFmt = opts.endValues ? (opts.endFormat || function (v) { return W < 500 ? opts.yFormat(v) : opts.tipFormat(v); }) : null;
+    var gap = endFmt ? 28 : 15;
     var ends = opts.series.map(function (s) { return { s: s, y: y(s.values[n - 1]) }; }).sort(function (a, b) { return a.y - b.y; });
-    for (var i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < 15) ends[i].y = ends[i - 1].y + 15;
+    for (var i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < gap) ends[i].y = ends[i - 1].y + gap;
+    // a single series gets a faint area under the line, as on finance sites
+    if (opts.series.length === 1 && opts.area !== false && !opts.series[0].step) {
+      var s0 = opts.series[0], base = y(Math.max(yMin, Math.min(yMax, opts.baseline != null ? opts.baseline : yMin)));
+      el("path", { d: s0.values.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); }).join("") + "L" + x(n - 1).toFixed(1) + " " + base + "L" + x(0).toFixed(1) + " " + base + "Z", fill: s0.color, opacity: .08 }, svg);
+    }
     opts.series.forEach(function (s) {
       var d = s.values.map(function (v, i) {
         if (!i) return "M" + x(0).toFixed(1) + " " + y(v).toFixed(1);
@@ -83,6 +96,10 @@
       el("circle", { cx: x(n - 1), cy: y(e.s.values[n - 1]), r: 3, fill: e.s.color }, svg);
       var t = el("text", { x: x(n - 1) + 8, y: e.y + 4, class: "endlabel", fill: "var(--ink)" }, svg);
       t.textContent = W < 500 ? (e.s.tiny || e.s.short || e.s.name) : (e.s.short || e.s.name);
+      if (endFmt) el("text", { x: x(n - 1) + 8, y: e.y + 17, class: "tick" }, svg).textContent = endFmt(e.s.values[n - 1]);
+    });
+    if (opts.dots) opts.series.forEach(function (s) {
+      s.values.forEach(function (v, i) { el("circle", { cx: x(i), cy: y(v), r: 2.2, fill: s.color }, svg); });
     });
 
     // hover crosshair
@@ -95,7 +112,9 @@
       var i = Math.max(0, Math.min(n - 1, Math.round(((sx - m.l) / (W - m.l - m.r)) * (n - 1))));
       cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", .35);
       dots.forEach(function (d, k) { d.setAttribute("cx", x(i)); d.setAttribute("cy", y(opts.series[k].values[i])); d.setAttribute("opacity", 1); });
-      tip.innerHTML = "<strong>" + (opts.xTip ? opts.xTip(opts.labels[i]) : monthLabel(opts.labels[i])) + "</strong><br>" + opts.series.map(function (s) {
+      // tooltip rows ordered by value, highest first, as on finance comparison charts
+      var order = opts.series.slice().sort(function (a, b) { return b.values[i] - a.values[i]; });
+      tip.innerHTML = "<strong>" + (opts.xTip ? opts.xTip(opts.labels[i]) : monthLabel(opts.labels[i])) + "</strong><br>" + order.map(function (s) {
         return '<span style="display:inline-block;width:8px;height:8px;margin-right:6px;background:' + s.color + '"></span>' + s.name + ": " + opts.tipFormat(s.values[i]);
       }).join("<br>");
       tip.classList.add("is-on");
@@ -114,7 +133,10 @@
     var W = width(host), H = opts.height || 300, m = { t: 22, r: 10, b: 34, l: W < 500 ? 46 : 62 };
     var all = [opts.base];
     opts.series.forEach(function (s) { all = all.concat(s.values); });
-    var ticks = niceTicks(Math.min.apply(null, all) * 0.98, Math.max.apply(null, all) * 1.01, 5);
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    var ticks = niceTicks(lo === 0 ? 0 : lo * 0.98, hi * 1.01, 5), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
+    while (ticks[ticks.length - 1] < hi * 1.04) ticks.push(+(ticks[ticks.length - 1] + tstep).toFixed(10));   // room for the value label above the tallest bar
+    while (ticks[0] > lo) ticks.unshift(+(ticks[0] - tstep).toFixed(10));
     var yMin = ticks[0], yMax = ticks[ticks.length - 1];
     var y = function (v) { return m.t + (1 - (v - yMin) / (yMax - yMin)) * (H - m.t - m.b); };
     var gw = (W - m.l - m.r) / opts.groups.length, bw = Math.min(46, (gw * 0.6) / opts.series.length);

@@ -26,19 +26,30 @@
   };
   // return over k months from a [[month, close], …] series (last row = latest close)
   var ret = function (rows, k) { var n = rows.length; return n > k ? rows[n - 1][1] / rows[n - 1 - k][1] - 1 : null; };
+  // daily series [[unixSeconds, close], …]: index of the last close on or before the same calendar date k months earlier,
+  // the convention finance sites use, so the chart, the figures and the sector table all agree
+  var startIndex = function (pts, k) {
+    var d = new Date((pts[pts.length - 1][0] + 19800) * 1000);
+    var target = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - k, d.getUTCDate(), 23, 59) / 1000 - 19800;
+    if (pts[0][0] > target) return -1;
+    var a = 0, b = pts.length - 1;
+    while (a < b) { var mid = (a + b + 1) >> 1; if (pts[mid][0] <= target) a = mid; else b = mid - 1; }
+    return a;
+  };
+  var retDaily = function (pts, k) { var i = pts && pts.length ? startIndex(pts, k) : -1; return i < 0 ? null : pts[pts.length - 1][1] / pts[i][1] - 1; };
 
   /* state: starts as the snapshot, replaced piece by piece by live data */
   var S = {
     live: false, liveTime: null, open: false,
-    nifty: { last: D.nifty.last, asOfText: day(D.nifty.asOf), prevClose: null, monthly: D.nifty.monthly, intraday: null },
-    sectors: D.sectors.map(function (s) { return { name: s.sector, symbol: s.symbol, monthly: s.monthly }; }),
+    nifty: { last: D.nifty.last, asOfText: day(D.nifty.asOf), monthly: D.nifty.monthly, series: D.nifty.series },
+    sectors: D.sectors.map(function (s) { return { name: s.sector, symbol: s.symbol, points: s.points }; }),
     cpi: D.cpi.annual, repoLive: null,
     backtest: (function () {
       var s = LiveBacktest.fromSnapshot(B, D);
       return s && s.ok ? { months: s.months, value: s.value, extended: s.extension.length > 0 } : { months: B.months, value: B.value, extended: false };
     })(),
     journal: (window.JOURNAL || []).map(function (e) { return { title: e.title, sections: e.sections }; }),
-    niftyRange: "60", sectorPeriod: "12"
+    niftyRange: "1Y", sectorPeriod: "12"
   };
 
   function renderStatus() {
@@ -53,47 +64,41 @@
 
   /* ---------------- 01 Nifty 50 */
   function renderNifty() {
-    var rows = S.nifty.monthly, n = rows.length, last = S.nifty.last;
-    var peak = rows.reduce(function (a, r) { return r[1] > a[1] ? r : a; });
-    var r5 = ret(rows, 60), r10 = ret(rows, n - 1);
-    var dayChg = S.nifty.prevClose ? last / S.nifty.prevClose - 1 : null;
+    var daily = S.nifty.series.daily.points, last = daily[daily.length - 1][1];
+    var peak = daily.reduce(function (a, p) { return p[1] > a[1] ? p : a; });
+    var r5 = retDaily(daily, 60), pd = new Date((peak[0] + 19800) * 1000);
     facts("nifty-facts", [
-      [S.live ? "Level" : "Last close", num(last, 2) + '<br><span class="muted small">' + S.nifty.asOfText + "</span>"],
-      ["Today", dayChg == null ? "—" : pct(dayChg, 2)],
-      ["1 month", pct(ret(rows, 1))], ["1 year", pct(ret(rows, 12))],
+      ["1 month", pct(retDaily(daily, 1))], ["1 year", pct(retDaily(daily, 12))],
       ["5 years", pct(r5) + '<br><span class="muted small">' + pct(Math.pow(1 + r5, 1 / 5) - 1) + " a year</span>"],
-      ["From 10-year high", pct(last / Math.max(peak[1], last) - 1) + '<br><span class="muted small">high: ' + num(peak[1]) + ", " + MONTHS[+peak[0].slice(5) - 1] + " " + peak[0].slice(0, 4) + "</span>"]
+      ["From 5-year high", pct(last / peak[1] - 1) + '<br><span class="muted small">high: ' + num(peak[1], 2) + ", " + pd.getUTCDate() + " " + MONTHS[pd.getUTCMonth()] + " " + pd.getUTCFullYear() + "</span>"]
     ]);
-    document.getElementById("nifty-caption").textContent = "Source: Yahoo Finance (^NSEI), month-end closes; the last point is the latest level. Over the 10 years shown the index returned " + pct(r10) + " (" + pct(Math.pow(1 + r10, 12 / (n - 1)) - 1) + " a year), excluding dividends.";
-    var host = document.getElementById("chart-nifty"); host.innerHTML = "";
-    if (S.niftyRange === "1D" && S.nifty.intraday) {
-      var pts = S.nifty.intraday;
-      Charts.line(host, {
-        labels: pts.map(function (p) { return p[0]; }),
-        series: [{ name: "Nifty 50", color: "#252522", values: pts.map(function (p) { return p[1]; }) }],
-        xTick: function (lab, i, n2) { return i === 0 || lab.slice(3) === "00" ? lab : null; },
-        xTip: function (lab) { return lab + " IST"; },
-        yFormat: function (v) { return num(v); }, tipFormat: function (v) { return num(v, 2); },
-        ariaLabel: "Intraday chart of the Nifty 50 today, latest " + num(last, 2) + "."
-      });
-      return;
+    var SRC = { "1D": "1-minute prices", "1Y": "daily closes", "3Y": "daily closes", "5Y": "daily closes", "10Y": "weekly closes" };
+    document.getElementById("nifty-caption").textContent = "Source: Yahoo Finance (^NSEI), " + SRC[S.niftyRange] + "; prices may be delayed up to 15 minutes. Price index, dividends excluded. Hover, tap or use the arrow keys on the chart to read any point.";
+    var se = S.nifty.series, range = S.niftyRange, pts, opt = { range: range, name: "Nifty 50" };
+    if (range === "1D") {
+      pts = se.intraday.points;
+      opt.prevClose = se.intraday.prevClose; opt.sessionStart = se.intraday.sessionStart; opt.sessionEnd = se.intraday.sessionEnd;
+    } else if (range === "10Y") {
+      pts = se.weekly.points;
+    } else {
+      var i0 = startIndex(daily, { "1Y": 12, "3Y": 36, "5Y": 60 }[range]);
+      pts = daily.slice(Math.max(0, i0));
     }
-    var months = +S.niftyRange, sub = rows.slice(Math.max(0, n - months - 1));
-    Charts.line(host, {
-      labels: sub.map(function (r) { return r[0]; }),
-      series: [{ name: "Nifty 50", color: "#252522", values: sub.map(function (r) { return r[1]; }), width: 2 }],
-      yFormat: function (v) { return v >= 1000 ? num(v / 1000) + "k" : num(v); },
-      tipFormat: function (v) { return num(v, 2); },
-      ariaLabel: "Line chart of the Nifty 50 over the last " + (months / 12) + " years, ending at " + num(last, 2) + "."
-    });
+    PriceChart.draw(document.getElementById("chart-nifty"), Object.assign(opt, { points: pts }));
   }
+  // redraw at the new width when a phone rotates or the window is resized
+  var resizeTimer = null, lastW = window.innerWidth;
+  window.addEventListener("resize", function () {
+    if (Math.abs(window.innerWidth - lastW) < 40) return;
+    lastW = window.innerWidth; clearTimeout(resizeTimer); resizeTimer = setTimeout(renderNifty, 200);
+  });
 
   /* ---------------- 02 Sectors */
   var PERIODS = [["1", "1 month"], ["3", "3 months"], ["6", "6 months"], ["12", "1 year"], ["36", "3 years"]];
   function renderSectors() {
     var k = +S.sectorPeriod;
-    var list = S.sectors.map(function (s) { return { name: s.name, r: ret(s.monthly, k) }; }).filter(function (s) { return s.r !== null; });
-    list.push({ name: "Nifty 50", r: ret(S.nifty.monthly, k), bench: true });
+    var list = S.sectors.map(function (s) { return { name: s.name, r: retDaily(s.points, k) }; }).filter(function (s) { return s.r !== null; });
+    list.push({ name: "Nifty 50", r: retDaily(S.nifty.series.daily.points, k), bench: true });
     list.sort(function (a, b) { return b.r - a.r; });
     var max = Math.max.apply(null, list.map(function (s) { return Math.abs(s.r); })) || 1;
     var label = PERIODS.filter(function (p) { return p[0] === String(k); })[0][1];
@@ -121,7 +126,7 @@
     Charts.line(host, {
       labels: rows.map(function (r) { return String(r[0]); }),
       series: [{ name: "CPI inflation", short: "CPI", color: "#556676", values: rows.map(function (r) { return r[1]; }) }],
-      yMin: 0, baseline: 0, band: { from: 2, to: 6, label: "RBI tolerance band 2–6%" },
+      yMin: 0, baseline: 0, endValues: true, dots: true, band: { from: 2, to: 6, label: "RBI tolerance band 2–6%" },
       xTick: function (lab, i, n) { return +lab % 5 === 0 || i === n - 1 ? lab : null; },
       xTip: function (lab) { return lab; },
       yFormat: function (v) { return v + "%"; }, tipFormat: function (v) { return v.toFixed(2) + "%"; },
@@ -149,7 +154,7 @@
     if (mismatch) document.getElementById("repo-facts").insertAdjacentHTML("afterend", '<p class="note" id="repo-warn"><strong>The RBI site now shows ' + S.repoLive.toFixed(2) + "%.</strong> The timeline below ends at " + cur[1].toFixed(2) + "% and needs the new decision added to observatory-rbi.js.</p>");
     var host = document.getElementById("chart-repo"); host.innerHTML = "";
     Charts.line(host, {
-      labels: labels, height: 260,
+      labels: labels, height: 260, endValues: true,
       series: [{ name: "Repo rate", short: "Repo", color: "#5F5679", values: values, step: true }],
       yMin: 3.5, yMax: 8, yFormat: function (v) { return v.toFixed(1) + "%"; }, tipFormat: function (v) { return v.toFixed(2) + "%"; },
       ariaLabel: "Step chart of the RBI repo rate since January 2015, currently " + cur[1].toFixed(2) + "%."
@@ -176,7 +181,7 @@
       : "My backtest of two monthly rules on five large caps, August 2023 – June 2026. Over the study, neither beat the index.";
     var host = document.getElementById("chart-strat"); host.innerHTML = "";
     Charts.line(host, {
-      labels: bt.months, baseline: 100000, height: 260, marker: bt.extended ? { at: "2026-06", text: "Study ends" } : null,
+      labels: bt.months, baseline: 100000, height: 300, endValues: true, marker: bt.extended ? { at: "2026-06", text: "Study ends" } : null,
       series: STRAT.map(function (s) { return Object.assign({ values: bt.value[s.key] }, s); }),
       yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; }, tipFormat: function (v) { return "₹" + num(v); },
       ariaLabel: "Value of ₹100,000 in each portfolio from August 2023" + (bt.extended ? ", continued after June 2026 with the same rules." : " to June 2026.")
@@ -201,7 +206,7 @@
 
   function renderAll() { renderStatus(); renderNifty(); renderSectors(); renderCpi(); renderRepo(); renderStrategies(); renderJournal(); }
 
-  chips("nifty-range", [["1D", "1D"], ["12", "1Y"], ["36", "3Y"], ["60", "5Y"], ["119", "10Y"]], S.niftyRange, function (k) { S.niftyRange = k; renderNifty(); });
+  chips("nifty-range", [["1D", "1D"], ["1Y", "1Y"], ["3Y", "3Y"], ["5Y", "5Y"], ["10Y", "10Y"]], S.niftyRange, function (k) { S.niftyRange = k; renderNifty(); });
   chips("sector-period", PERIODS, S.sectorPeriod, function (k) { S.sectorPeriod = k; renderSectors(); });
   renderAll();
 
@@ -210,8 +215,10 @@
     var soft = function (p) { return p.then(null, function () { return null; }); };
     return Promise.all([
       soft(Live.chart(["^NSEI"], { range: "10y", interval: "1mo" })),
-      soft(Live.chart(["^NSEI"], { range: "1d", interval: "5m" })),
-      soft(Live.chart(S.sectors.map(function (s) { return s.symbol; }), { range: "5y", interval: "1mo" })),
+      soft(Live.chart(["^NSEI"], { range: "1d", interval: "1m" })),
+      soft(Live.chart(["^NSEI"], { range: "5y", interval: "1d" })),
+      soft(Live.chart(["^NSEI"], { range: "10y", interval: "1wk" })),
+      soft(Live.chart(S.sectors.map(function (s) { return s.symbol; }), { range: "5y", interval: "1d" })),
       soft(Live.get("/api/cpi")),
       soft(Live.get("/api/rbi")),
       soft(LiveBacktest.load(B)),
@@ -224,15 +231,19 @@
         S.nifty.last = q.price; S.nifty.asOfText = Live.dateIST(q.time) + ", " + Live.timeIST(q.time);
         S.open = Live.isOpen(q); got = true;
       }
-      if (r[1] && r[1]["^NSEI"].t) {
-        var d = r[1]["^NSEI"]; S.nifty.prevClose = d.prevClose;
-        S.nifty.intraday = d.t.map(function (t, i) { return [Live.timeIST(t).slice(0, 5), d.c[i]]; }).filter(function (p) { return p[1] != null; });
-      }
-      if (r[2]) S.sectors.forEach(function (s) { var x = r[2][s.symbol]; if (x && x.t) s.monthly = Live.monthly(x, false); });
-      if (r[3] && r[3].annual) S.cpi = r[3].annual;
-      if (r[4] && r[4].repo) S.repoLive = r[4].repo;
-      if (r[5] && r[5].ok) S.backtest = { months: r[5].months, value: r[5].value, extended: r[5].extension.length > 0 };
-      if (r[6] && r[6].entries) S.journal = r[6].entries;
+      // price-chart series, in the same shape as the snapshot
+      var toSeries = function (x) {
+        return { points: x.t.map(function (t, i) { return [t, x.c[i]]; }).filter(function (p) { return p[1] != null; }),
+          prevClose: x.prevClose, price: x.price, time: x.time, sessionStart: x.tradingStart, sessionEnd: x.tradingEnd };
+      };
+      var ser = {};
+      [["intraday", r[1]], ["daily", r[2]], ["weekly", r[3]]].forEach(function (p) { if (p[1] && p[1]["^NSEI"] && p[1]["^NSEI"].t) ser[p[0]] = toSeries(p[1]["^NSEI"]); });
+      if (ser.intraday && ser.daily && ser.weekly) S.nifty.series = ser;
+      if (r[4]) S.sectors.forEach(function (s) { var x = r[4][s.symbol]; if (x && x.t) s.points = x.t.map(function (t, i) { return [t, x.c[i]]; }).filter(function (p) { return p[1] != null; }).slice(-820); });
+      if (r[5] && r[5].annual) S.cpi = r[5].annual;
+      if (r[6] && r[6].repo) S.repoLive = r[6].repo;
+      if (r[7] && r[7].ok) S.backtest = { months: r[7].months, value: r[7].value, extended: r[7].extension.length > 0 };
+      if (r[8] && r[8].entries) S.journal = r[8].entries;
       if (got) { S.live = true; S.liveTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }); }
       var warn = document.getElementById("repo-warn"); if (warn) warn.remove();
       renderAll();
