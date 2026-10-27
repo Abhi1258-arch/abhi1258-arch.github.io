@@ -47,7 +47,7 @@
           <h2 style="margin-top:0">The question</h2>
           <p>How does inflation affect the financial lives of middle-class households in India? Not the headline CPI number, but what it does to spending, saving, investing, and decisions such as eating out, buying a car or getting married.</p>
           <figure>
-            <img src="../assets/img/inflation-fig-1.png" alt="Line chart of India's annual CPI inflation, 2018 to 2024: moderate in 2018–19, a jump in 2020, a dip in 2021, a rise in 2022, then easing in 2023 and 2024." loading="lazy">
+            <div class="chart" id="chart-cpi-paper" style="margin:0"></div>
             <figcaption>CPI inflation in India, 2018–2024 (annual %). Source: World Bank Group.</figcaption>
           </figure>
         </section>
@@ -99,7 +99,7 @@
             </table>
           </div>
           <figure>
-            <img src="../assets/img/inflation-fig-7.png" alt="Grouped bar chart comparing the illustrative household's 2018 and 2024 monthly budget by category; every expense rises while savings fall from ₹20,000 to ₹15,000." loading="lazy">
+            <ul class="legend" id="legend-budget"></ul><div class="chart" id="chart-budget" style="margin:0"></div>
             <figcaption>Monthly budget of the illustrative household, 2018 vs 2024. Source: illustrative budget constructed for the paper.</figcaption>
           </figure>
         </section>
@@ -130,5 +130,30 @@
 <footer class="site-footer" id="site-footer"></footer>
 <script src="../assets/js/content.js"></script>
 <script src="../assets/js/site.js"></script>
+<script src="../assets/js/charts.js"></script>
+<script>
+(function () {
+  // Figure 1: World Bank annual CPI inflation, India (the same series the paper charts)
+  var cpi = [[2018, 3.94], [2019, 3.73], [2020, 6.62], [2021, 5.13], [2022, 6.70], [2023, 5.65], [2024, 4.95]];
+  Charts.line(document.getElementById("chart-cpi-paper"), {
+    labels: cpi.map(function (r) { return String(r[0]); }), height: 280, yMin: 0, baseline: 0, endValues: true, dots: true,
+    band: { from: 2, to: 6, label: "RBI tolerance band 2–6%" },
+    series: [{ name: "CPI inflation", short: "CPI", color: "#556676", values: cpi.map(function (r) { return r[1]; }) }],
+    xTick: function (lab) { return lab; }, xTip: function (lab) { return lab; },
+    yFormat: function (v) { return v + "%"; }, tipFormat: function (v) { return v.toFixed(2) + "%"; },
+    ariaLabel: "Line chart of India's annual CPI inflation: 3.9% in 2018, 3.7% in 2019, 6.6% in 2020, 5.1% in 2021, 6.7% in 2022, 5.7% in 2023, 5.0% in 2024."
+  });
+  // Figure 7: the paper's illustrative budget (Tables 1 and 2)
+  var cats = ["Rent", "Food", "School fees", "Transport", "Other essentials", "Savings"];
+  var S = [{ name: "2018 budget", color: "#8B9BAA", values: [15000, 8000, 5000, 4000, 8000, 20000] }, { name: "2024 budget", color: "#252522", values: [24000, 14000, 10000, 7000, 15000, 15000] }];
+  document.getElementById("legend-budget").innerHTML = S.map(function (s) { return '<li><i style="background:' + s.color + ';height:8px"></i>' + s.name + "</li>"; }).join("");
+  var rupee = function (v) { return "₹" + v.toLocaleString("en-IN"); };
+  Charts.bars(document.getElementById("chart-budget"), {
+    groups: cats, base: 0, series: S, height: 300,
+    yFormat: function (v) { return "₹" + (v / 1000) + "k"; }, labelFormat: function (v) { return (v / 1000) + "k"; }, tipFormat: rupee,
+    ariaLabel: "Grouped bar chart of the illustrative monthly budget, 2018 vs 2024: rent 15,000 to 24,000; food 8,000 to 14,000; school fees 5,000 to 10,000; transport 4,000 to 7,000; other essentials 8,000 to 15,000; savings 20,000 to 15,000."
+  });
+})();
+</script>
 </body>
 </html>

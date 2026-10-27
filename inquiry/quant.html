@@ -170,7 +170,7 @@
 
   legend("legend-value", SERIES);
   Charts.line(document.getElementById("chart-value"), {
-    labels: B.months, baseline: 100000,
+    labels: B.months, baseline: 100000, endValues: true,
     series: SERIES.map(function (s) { return Object.assign({ values: B.value[s.key] }, s); }),
     yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; },
     tipFormat: function (v) { return rupee(v); },
@@ -179,7 +179,7 @@
 
   legend("legend-dd", SERIES);
   Charts.line(document.getElementById("chart-dd"), {
-    labels: B.months, baseline: 0, yMax: 0, height: 260,
+    labels: B.months, baseline: 0, yMax: 0, height: 280, endValues: true,
     series: SERIES.map(function (s) { return Object.assign({ values: B.drawdown[s.key] }, s); }),
     yFormat: function (v) { return Math.round(v * 100) + "%"; },
     tipFormat: function (v) { return pct(v, 1); },
@@ -231,7 +231,7 @@
     }).join("");
     var host = document.getElementById("chart-live"); host.innerHTML = "";
     Charts.line(host, {
-      labels: o.months, baseline: 100000, marker: { at: "2026-06", text: "Study ends" },
+      labels: o.months, baseline: 100000, endValues: true, marker: { at: "2026-06", text: "Study ends" },
       series: SERIES.map(function (s) { return Object.assign({ values: o.value[s.key] }, s); }),
       yFormat: function (v) { return "₹" + Math.round(v / 1000) + "k"; },
       tipFormat: function (v) { return rupee(v); },
